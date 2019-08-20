@@ -416,5 +416,5 @@ Zookeeper是不是已经足够稳定了，一经部署就不再需要关注了�
 面临这些问题，我们是如何解决的呢？
 
 - 针对Zxid溢出的问题，目前官方还没有给出修复方案。有网友提了个[PR](https://github.com/apache/zookeeper/pull/262)但是官方没有merge，需要自己打patch，稳定性风险较高，暂不考虑。希望官方在3.6.0版本能解决这个问题。
-- 针对后面三个问题，我们开发了[proxy](https://github.com/pyinx/zk-proxy)来解决。目前proxy功能已经开发完成，在我们生产环境稳定运行了2个多月，没有发生任何问题。但是proxy还有许多需要不足的地方，ACL的功能还需要完善，希望大家一起提PR。
+- 针对后面三个问题，我们开发了[proxy](https://github.com/pyinx/zk-proxy)来解决。目前proxy功能已经开发完成，在我们生产环境稳定运行了2个多月，没有发生任何问题。但是proxy还有许多不足的地方，ACL的功能还需要完善，希望大家一起提PR。
 ![](https://github.com/pyinx/zk-proxy/blob/master/images/logging.png?raw=true)
