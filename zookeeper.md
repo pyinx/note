@@ -1,23 +1,19 @@
 # Zookeeper
 - [CAP定理](#CAP定理)
 - [Zookeeper概述](#zookeeper概述)
-	- [Zookeeper特点](#zookeeper特点)
-	- [Zookeeper使用场景](#zookeeper使用场景)
-	- [Zookeeper节点状态](#zookeeper节点状态)
-	- [Zookeeper数据类型](#zookeeper数据类型)
-	- [Zookeeper数据版本](#zookeeper数据版本)
-	- [Zookeeper Watcher](#Watcher)
-	- [Zookeeper Session](#Session)
-	- [Zookeeper ACL](#ACL)
-	- [Zookeeper ZAB](#ZAB)
-		- [ZAB 选主流程](#选主流程)
-		- [ZAB 数据同步](#数据同步)
-		- [ZAB 过半同意](#过半同意)
-- [Zookeeper运维](#Zookeeper运维)
-	- [Zookeeper集群搭建](#Zookeeper集群搭建)
-	- [Zookeeper集群监控](#Zookeeper集群监控)
-	- [常用Shell操作](#常用shell操作)
-	- [开源工具推荐](#开源工具推荐)
+- [Zookeeper特点](#zookeeper特点)
+- [Zookeeper使用场景](#zookeeper使用场景)
+- [Zookeeper节点状态](#zookeeper节点状态)
+- [Zookeeper数据类型](#zookeeper数据类型)
+- [Zookeeper数据版本](#zookeeper数据版本)
+- [Zookeeper Watcher](#Watcher)
+- [Zookeeper Session](#Session)
+- [Zookeeper ACL](#ACL)
+- [Zookeeper ZAB](#ZAB)
+	- [ZAB 选主流程](#选主流程)
+	- [ZAB 数据同步](#数据同步)
+	- [ZAB 过半同意](#过半同意)
+
 
 ## CAP定理
 
@@ -191,162 +187,3 @@ Zab协议有两种模式，它们分别是恢复模式(recovery)和广播模式(
 ### 过半同意
 当数据同步完成后，集群开始从恢复模式进入广播模式，开始接受客户端的事物请求。
 当只有Leader或少数机器批准执行某个任务时，则极端情况下Leader和这些少量机器挂掉，则无法保证新Leader知道之前已经批准该任务，这样就违反了数据可靠性。所以Leader在批准一个任务之前应该保证集群里大部分的机器知道这个提案，这样即使Leader挂掉，选举出来的新Leader也会从其他Follower处获取这个提案。而如果Leader要求所有Follower都同意才执行提案也不行，此时若有一个机器挂掉，Leader就无法继续工作，这样的话整个集群相当于单节点，无法保证可靠性。
-
-## Zookeeper集群搭建
-
-- 1.安装jdk，并且配置jdk的环境变量
-
-- 2.去官网下载zookeeper的安装包，上传到linux集群环境下 <http://zookeeper.apache.org/>
-
-- 3.解压安装包 `tar -zxvf zookeeper-X.X.X.tar.gz`
-
-- 4.进入conf目录，复制zoo-sample.cfg为zoo.cfg,zoo.cfg及为Zookeeper的默认配置文件，我们通过修改zoo.cfg即可配置zookeeper
-
-  -  修改dataDir路径
-    指定zookeeper将数据保存在哪个目录下，如果不修改，默认在/tmp下，由于该目录下数据可能会被linux自动清理，所以一定要修改该路径
-
-  - 修改服务器列表
-    单机模式：在zoo.cfg中只配置一个server.id就是单机模式了
-    伪分布式：在zoo.cfg中配置多个server.id，其中ip都是当前机器，而端口各不相同，这就是伪集群模式
-    完全分布式：多台机器上各自配置server.id
-
-    ```shell
-    server.1=xxx.xxx.xxx.xxx:2888:3888
-    server.2=xxx.xxx.xxx.xxx:2888:3888
-    server.3=xxx.xxx.xxx.xxx:2888:3888
-    ```
-
-  - 在dataDir路径下生成myid文件
-    在dataDir目录下cat一个叫myid的文件，写入你所分配给当前机器的server.id
-
-- 5.Zookeeper操作指令
-
-  和Redis，Mysql等服务类似,访问Zookeeper安装路径下的`bin/zkServer.sh` 即可完成对服务端的启动，停止等操作，具体参数可通过`bin/zkServer.sh --help`查询,以下是常用指令
-  
-  ```shell
-  bin/zkServer.sh start #启动zookeeper服务
-  bin/zkServer.sh stop #停止zookeeper服务
-  bin/zkServer.sh restart #重启zookeeper服务
-  bin/zkServer.sh status #查看服务器状态
-  ```
-  
-
-注意！搭建在多台服务器上的Zookeeper都需要启动，如果不想一台一台的启动，可以通过编写批量启动的shell脚本通过ssh的方式实现对Zookeeper集群的管理。或者安装CDH等Hadoop 发行版实现对Zookeeper集群的管理
-
-## Zookeeper集群监控
-- 基础监控
-	- CPU
-	- 内存
-	- 网络
-	- IO
-- 进程监控
-	- CPU
-	- 内存
-	- IO
-	- 连接数
-	- FD数
-- 端口监控
-- 日志监控
-- JVM监控
-- JMX监控
-- ZXID监控
-- 四字监控
-	- conf 获取当前zookeeper服务器的配置
-	- envi 获取当前zookeeper服务器的环境变量
-	- cons 获取当前zookeeper服务器的活跃连接
-	- crst 重置当前zookeeper服务器所有连接的统计信息
-	- srst 重置当前服务器的统计信息
-	- srvr 输出服务器的详细信息。zk版本、接收/发送包数量、连接数、模式（leader/follower）、节点总数
-	- stat 输出服务器的详细信息。zk版本、接收/发送包数量、连接数、模式（leader/follower）、节点总数、客户端列表
-	- mntr 列出集群的健康状态。包括“接受/发送”的包数量、操作延迟、连接数、缓冲队列数、当前服务模式（leader/follower）、节点总数、watch总数、临时节点总数
-	- ruok 返回“imok”表示正常，否则表示服务异常。
-	- wchs 列出服务器watches的简洁信息：连接总数、watching节点总数和watches总数
-	- wchc 通过session分组，列出watch的所有节点，它的输出是一个与 watch 相关的会话的节点列表。如果watches数量很大的话，将会产生很大的开销，会影响性能，小心使用。
-	- wchp 通过路径分组，列出所有的 watch 的session id信息。它输出一个与 session 相关的路径。如果watches数量很大的话，将会产生很大的开销，会影响性能，小心使用。
-	- dump 列出未经处理的会话和临时节点（只在leader上有效）
-
-
-## 常用Shell操作
-
-- 连接zookeeper客户端
-  `bin/zkCli.sh [-server ip:port]` 
-- 列出节点：
-  `ls path [watch]`
-- 创建节点：
-  `create [-s] [-e] path data acl` 
-- 获取节点：
-  `get path [watch]`
-- 更新操作：
-  `set path data [version]`
-- 删除操作：
-  `delete path [version]`
-- 批量执行：
-  
-  ```
-  zkCli.sh -server localhost:2181 <<EOF  
-  ls /
-  get /
-  quit
-  EOF
-  ```
-- 分析snapshot文件：
-
-```
-#!/bin/sh
-
-function help(){
-        echo "-----------------"
-        echo "HELP: $0 SnapshotFile"
-        echo "-----------------"
-        exit 1
-}
-
-if [ $# -ne 1 ]
-then
-        help
-fi
-
-file=$1
-if [ ! -f $file ]
-then
-        echo "ERROR: $file not found"
-        exit 1
-fi
-zkDir=/usr/local/zookeeper
-JAVA_OPTS="$JAVA_OPTS -Djava.ext.dirs=$zkDir:$zkDir/lib"
-java $JAVA_OPTS org.apache.zookeeper.server.SnapshotFormatter "$file"
-```
-- 分析log文件：
-
-```
-#!/bin/sh
-
-function help(){
-        echo "-----------------"
-        echo "HELP: $0 LogFile"
-        echo "-----------------"
-        exit 1
-}
-
-if [ $# -ne 1 ]
-then
-        help
-fi
-
-LogFile=$1
-if [ ! -f $LogFile ]
-then
-        echo "ERROR: $LogFile not found"
-        exit 1
-fi
-zkDir=/usr/local/zookeeper
-JAVA_OPTS="$JAVA_OPTS -Djava.ext.dirs=$zkDir:$zkDir/lib"
-java $JAVA_OPTS org.apache.zookeeper.server.LogFormatter "$LogFile"
-```
-
-## 开源工具推荐
-- zk抓包工具：[https://github.com/pyinx/zk-sniffer](https://github.com/pyinx/zk-sniffer)
-- zk压测工具：[https://github.com/phunt/zk-smoketest](https://github.com/phunt/zk-smoketest)
-- zk监控工具：[https://github.com/phunt/zktop](https://github.com/phunt/zktop)
-- zkCli工具：[https://github.com/let-us-go/zkcli](https://github.com/let-us-go/zkcli)
-
