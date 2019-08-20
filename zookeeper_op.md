@@ -121,19 +121,19 @@ echo srvr|nc 127.1 2181
 	- 【p2】zookeeper服务连接数大于1w
 	- 【p2】zookeeper服务watch数大于10w
 - 四字命令介绍：
-        - conf 获取当前zookeeper服务器的配置
-        - envi 获取当前zookeeper服务器的环境变量
-        - cons 获取当前zookeeper服务器的活跃连接
-        - crst 重置当前zookeeper服务器所有连接的统计信息
-        - srst 重置当前服务器的统计信息
-        - srvr 输出服务器的详细信息。zk版本、接收/发送包数量、连接数、模式（leader/follower）、节点总数
-        - stat 输出服务器的详细信息。zk版本、接收/发送包数量、连接数、模式（leader/follower）、节点总数、客户端列表
-        - mntr 列出集群的健康状态。包括“接受/发送”的包数量、操作延迟、连接数、缓冲队列数、当前服务模式（leader/follower）、节点总数、watch总数、临时节点总数
-        - ruok 返回“imok”表示正常，否则表示服务异常。
-        - wchs 列出服务器watches的简洁信息：连接总数、watching节点总数和watches总数
-        - wchc 通过session分组，列出watch的所有节点，它的输出是一个与 watch 相关的会话的节点列表。如果watches数量很大的话，将会产生很大的开销，会影响性能，小心使用。
-        - wchp 通过路径分组，列出所有的 watch 的session id信息。它输出一个与 session 相关的路径。如果watches数量很大的话，将会产生很大的开销，会影响性能，小心使用。
-        - dump 列出未经处理的会话和临时节点（只在leader上有效）
+    - <b>conf</b> 获取当前zookeeper服务器的配置
+    - <b>envi</b> 获取当前zookeeper服务器的环境变量
+    - <b>cons</b> 获取当前zookeeper服务器的活跃连接
+    - <b>crst</b> 重置当前zookeeper服务器所有连接的统计信息
+    - <b>srst</b> 重置当前服务器的统计信息
+    - <b>srvr</b> 输出服务器的详细信息。zk版本、接收/发送包数量、连接数、模式（leader/follower）、节点总数
+    - <b>stat</b> 输出服务器的详细信息。zk版本、接收/发送包数量、连接数、模式（leader/follower）、节点总数、客户端列表
+    - <b>mntr</b> 列出集群的健康状态。包括“接受/发送”的包数量、操作延迟、连接数、缓冲队列数、当前服务模式（leader/follower）、节点总数、watch总数、临时节点总数
+    - <b>ruok</b> 返回“imok”表示正常，否则表示服务异常。
+    - <b>wchs</b> 列出服务器watches的简洁信息：连接总数、watching节点总数和watches总数
+    - <b>wchc</b> 通过session分组，列出watch的所有节点，它的输出是一个与 watch 相关的会话的节点列表。如果watches数量很大的话，将会产生很大的开销，会影响性能，小心使用。
+    - <b>wchp</b> 通过路径分组，列出所有的 watch 的session id信息。它输出一个与 session 相关的路径。如果watches数量很大的话，将会产生很大的开销，会影响性能，小心使用。
+    - <b>dump</b> 列出未经处理的会话和临时节点（只在leader上有效）
 
 ### 日志监控
 - 实现：
