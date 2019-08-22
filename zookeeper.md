@@ -86,7 +86,7 @@ Zookeeper官网地址为[http://zookeeper.apache.org/](http://zookeeper.apache.o
   - ContainerNode：3.5.3版本引入，用来解决分布式锁场景下产生大量孤儿节点的问题（搭配PERSISTENT使用）
   - TTLNode：3.5.3版本引入，当在TTL时间内节点没有被修改并且没有子节点将自动被删除（搭配PERSISTENT、PERSISTENT_SEQUENTIAL使用）
 
-![](./images/zookeeper_node.jpg)
+![](./images/zookeeper_node.png)
 
 ## Zookeeper数据版本
 
@@ -469,7 +469,7 @@ min(cpu_used/cpu_max,cons_num/cons_max,data_num/data_max,watch_num/watch_max,out
 - 报警策略：
 	* 【p2】容量使用率超过80%
 
-![](./images/zk_util.jpg)
+![](./images/zookeeper_util.jpg)
 
 ## 日常运维
 ### 抓包分析
@@ -479,8 +479,8 @@ min(cpu_used/cpu_max,cons_num/cons_max,data_num/data_max,watch_num/watch_max,out
 zk-sniffer -device=eth0 -port=2181
 ```
 
-![](./images/zk_sniffer.jpg)
-![](./images/zk_log.jpg)
+![](./images/zookeeper_sniffer.jpg)
+![](./images/zookeeper_log.jpg)
 
 ### 分析log文件
 
