@@ -77,6 +77,7 @@ Zookeeper官网地址为[http://zookeeper.apache.org/](http://zookeeper.apache.o
 ## Zookeeper数据类型
 
 - Zookeeper的数据结构非常类似于文件系统。是由节点组成的树形结构。不同的是文件系统是由文件夹和文件来组成的树，而Zookeeper中是由Znode来组成的树。每一个Znode里都可以存放一段数据，Znode下还可以挂载零个或多个子Znode节点，从而组成一个树形结构。
+
 - 节点类型
   - 持久化节点(PERSISTENT)：znode节点的数据不会丢失，除非是客户端主动delete
   - 持久化顺序节点(PERSISTENT_SEQUENTIAL)：znode节点会根据当前已经存在的znode节点编号自动加1
@@ -84,6 +85,8 @@ Zookeeper官网地址为[http://zookeeper.apache.org/](http://zookeeper.apache.o
   - 临时顺序节点(EPHEMERAL_SEQUENTIAL)：znode节点编号会自动加 1，当session中断后会被删除
   - ContainerNode：3.5.3版本引入，用来解决分布式锁场景下产生大量孤儿节点的问题（搭配PERSISTENT使用）
   - TTLNode：3.5.3版本引入，当在TTL时间内节点没有被修改并且没有子节点将自动被删除（搭配PERSISTENT、PERSISTENT_SEQUENTIAL使用）
+
+![](./images/zookeeper_node.jpg)
 
 ## Zookeeper数据版本
 
@@ -226,6 +229,8 @@ Zab协议有两种模式，它们分别是恢复模式(recovery)和广播模式(
 
 当数据同步完成后，集群开始从恢复模式进入广播模式，开始接受客户端的事物请求。
 当只有Leader或少数机器批准执行某个任务时，则极端情况下Leader和这些少量机器挂掉，则无法保证新Leader知道之前已经批准该任务，这样就违反了数据可靠性。所以Leader在批准一个任务之前应该保证集群里大部分的机器知道这个提案，这样即使Leader挂掉，选举出来的新Leader也会从其他Follower处获取这个提案。而如果Leader要求所有Follower都同意才执行提案也不行，此时若有一个机器挂掉，Leader就无法继续工作，这样的话整个集群相当于单节点，无法保证可靠性。
+
+![](./images/zookeeper_zab.jpg)
 
 # Zookeeper运维
 
