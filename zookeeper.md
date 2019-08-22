@@ -8,6 +8,7 @@
 	- [Watcher](#Watcher)
 	- [Session](#Session)
 	- [ACL](#ACL)
+	- [API](#API)
 	- [ZAB](#ZAB)
 		- [选主流程](#选主流程)
 		- [数据同步](#数据同步)
@@ -38,7 +39,7 @@
 
 # Zookeeper介绍
 
-通过介绍Zookeeper的背景、数据类型、使用场景以及ZAB协议，让大家对Zookeeper有一个深入的了解。
+通过介绍Zookeeper的背景、数据类型、使用场景以及ZAB协议，让大家对Zookeeper有一个清晰的了解。
 
 ## Zookeeper概述
 
@@ -158,6 +159,30 @@ zookeeper会为每个客户端分配一个session，类似于web服务器一样�
 	- READ(r):  读权限，可以获取当前node的数据，可以list当前node所有的child nodes
 	- WRITE(w):  写权限，可以向当前node写数据
 	- ADMIN(a):  管理权限，可以设置当前node的permission
+
+## API
+|API| zkCli命令|说明|操作类型|创建watcher|
+|----|----|----|----|----|----| 
+|CONNECT |connect|连接zk服务|写|否|
+|CREATE|create|创建znode节点|写|否|
+|CREATE2||创建znote节点|写|否|
+|DELETE |delete/rmr|删除znode节点|写|否|
+|EXISTS||判断znode节点是否存在|读|否|
+|EXISTS_W||判断znode节点是否存在|读|是|
+|GETDATA|get|获取znode的值|读|否|
+|GETDATA_W|get|获取znode的值|读|是|
+|SETDATA|set|变更znote的值|写|否|
+|GETACL|getAcl|获取znode的ACL|读|否|
+|SETACL|setAcl|变更znode的ACL|写|否|
+|SETAUTH|addauth|设置权限|写|否|
+|GETCHILDREN|ls|获取znode的子节点列表|读|否|
+|GETCHILDREN_W|ls|获取znode的子节点列表|读|是|
+|GETCHILDREN2|ls2|获取znode的子节点列表|读|否|
+|GETCHILDREN2_W|ls2|获取znode的子节点列表|读|是|
+|SYNC|sync|同步znode的数据|读|是|
+|CLOSE|close/quit|关闭连接|写|否|
+|PING||心跳探测|读|否|
+|MULTI||批量执行多个命令|-|-|
 
 
 ## ZAB
@@ -421,6 +446,21 @@ if __name__ == '__main__':
 - 报警策略：
 	* 【p2】zxid在12小时后即将用完
 
+### 容量监控
+- 实现：
+
+```bash
+# 容量计算方法：
+# 1.每个指标设置不同的权重，综合计算容量水位 
+# 2.最差的指标作为容量水位
+min(cpu_used/cpu_max,cons_num/cons_max,data_num/data_max,watch_num/watch_max,outstanding_num/outstanding_max)
+```
+- 监控指标：
+	* PLUGIN.zk_util.percent 容量百分比
+- 报警策略：
+	* 【p2】容量使用率超过80%
+
+![](./images/zk_util.jpg)
 
 ## 日常运维
 ### 抓包分析
@@ -429,7 +469,9 @@ if __name__ == '__main__':
 #get from https://github.com/pyinx/zk-sniffer
 zk-sniffer -device=eth0 -port=2181
 ```
-![](http://wx4.sinaimg.cn/mw690/6f6a4381ly1fcjaly09eej213e0hkgxg.jpg)
+
+![](./images/zk_sniffer.jpg)
+![](./images/zk_log.jpg)
 
 ### 分析log文件
 
