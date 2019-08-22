@@ -47,6 +47,7 @@
 ZooKeeper是一个分布式的、开放源码的分布式协调服务，是Google的Chubby一个开源的实现，是Hadoop和Hbase的重要组件。它是一个为分布式应用提供一致性服务的软件，提供的功能包括：配置维护、域名服务、分布式同步、组服务等。由于Hadoop生态系统中很多项目都依赖于zookeeper，如Pig，Hive等， 似乎很像一个动物园管理员，于是取名为Zookeeper。
 Zookeeper官网地址为[http://zookeeper.apache.org/](http://zookeeper.apache.org/)。
 
+![](./images/zookeeper.jpg)
 
 ## Zookeeper特点
 
