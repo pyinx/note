@@ -79,9 +79,11 @@ Zookeeper官网地址为[http://zookeeper.apache.org/](http://zookeeper.apache.o
 - Zookeeper的数据结构非常类似于文件系统。是由节点组成的树形结构。不同的是文件系统是由文件夹和文件来组成的树，而Zookeeper中是由Znode来组成的树。每一个Znode里都可以存放一段数据，Znode下还可以挂载零个或多个子Znode节点，从而组成一个树形结构。
 - 节点类型
   - 持久化节点(PERSISTENT)：znode节点的数据不会丢失，除非是客户端主动delete
-  - 持久化顺序节点(PERSISTENT_SEQUENTIAL)：znode节点会根据当前已经存在的znode节点编号自动加 1
+  - 持久化顺序节点(PERSISTENT_SEQUENTIAL)：znode节点会根据当前已经存在的znode节点编号自动加1
   - 临时节点：临时节点(EPHEMERAL)：当session中断后会被删除
   - 临时顺序节点(EPHEMERAL_SEQUENTIAL)：znode节点编号会自动加 1，当session中断后会被删除
+  - ContainerNode：3.5.3版本引入，用来解决分布式锁场景下产生大量孤儿节点的问题（搭配PERSISTENT使用）
+  - TTLNode：3.5.3版本引入，当在TTL时间内节点没有被修改并且没有子节点将自动被删除（搭配PERSISTENT、PERSISTENT_SEQUENTIAL使用）
 
 ## Zookeeper数据版本
 
