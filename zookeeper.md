@@ -40,7 +40,7 @@
 
 # Zookeeper介绍
 
-通过介绍Zookeeper的背景、数据类型、使用场景以及ZAB协议，让大家对Zookeeper有一个清晰的了解。
+首先介绍下Zookeeper的背景、数据类型、使用场景以及ZAB协议，让大家对Zookeeper有一个清晰的认识。
 
 ## Zookeeper概述
 
