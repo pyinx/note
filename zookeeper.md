@@ -235,7 +235,7 @@ Zab协议有两种模式，它们分别是恢复模式(recovery)和广播模式(
 
 # Zookeeper运维
 
-介绍完了Zookeeper的基本知识，下面从运维的角度来了解下zookeeper。
+介绍完Zookeeper的基本知识后，接下来从运维的角度来了解下zookeeper。
 
 ## 部署
 
