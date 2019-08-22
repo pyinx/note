@@ -2,5 +2,4 @@
 学习笔记
 
 ## zookeeper
-- [zookeeper介绍](./zookeeper.md)
-- [zookeeper运维](./zookeeper_op.md)
+- [zookeeper介绍与运维实践](./zookeeper.md)
