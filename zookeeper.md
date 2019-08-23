@@ -10,9 +10,10 @@
 	- [ACL](#ACL)
 	- [API](#API)
 	- [ZAB](#ZAB)
-		- [选主流程](#选主流程)
-		- [数据同步](#数据同步)
-		- [过半同意](#过半同意)
+		- [ZXID](#ZXID)
+		- [选主阶段](#选主阶段)
+		- [同步阶段](#同步阶段)
+		- [广播阶段](#广播阶段)
 - [Zookeeper运维](#zookeeper运维)
 	- [部署](#部署)
 		- [启动模式](#启动模式)
@@ -25,7 +26,7 @@
 		- [日志监控](#日志监控)
 		- [Zxid监控](#Zxid监控)
 		- [容量监控](#容量监控)
-	- [日常运维](#日常运维)
+	- [日常操作](#日常操作)
 		- [抓包分析](#抓包分析)
 		- [分析log文件](#分析log文件)
 		- [分析snapshot文件](#分析snapshot文件)
@@ -66,7 +67,6 @@ Zookeeper官网地址为[http://zookeeper.apache.org/](http://zookeeper.apache.o
 - 集群选举
 - 分布式锁
 - 队列管理
-- 消息订阅
 
 ## Zookeeper节点状态
 
@@ -101,7 +101,7 @@ Zookeeper的每个ZNode上都会存储数据，对应到每个ZNode，Zookeeper�
 - cversion: 子节点数据更新次数
 - dataVersion: 节点数据更新次数
 - aclVersion: acl的变更次数
-- ephemeralOwner: 如果znode是临时节点，则值为所有者的sessionId；如果不是临时节点，则为零
+- ephemeralOwner: 如果znode是临时节点，则值为所有者的sessionId；如果不是临时节点，则为0
 - dataLength: 节点的数据长度
 - numChildren: 子节点个数
 
@@ -122,6 +122,7 @@ Watcher(事件监听器)是 Zookeeper提供的一种 发布/订阅的机制。Zo
 	- 如果被watch的节点频繁更新，会出现“丢数据”的情况
 	- watcher数量过多会导致性能下降
 
+![](./images/zookeeper_watch.jpg)
 
 ## Session
 
@@ -149,6 +150,7 @@ zookeeper会为每个客户端分配一个session，类似于web服务器一样�
 	- 中间40位代表zk节点当前角色在创建的时候的时间戳
 	- 低16位是一个计数器，初始值为0
 
+![](./images/zookeeper_session.jpg)
 
 ## ACL
 
@@ -195,20 +197,27 @@ zookeeper会为每个客户端分配一个session，类似于web服务器一样�
 
 ## ZAB
 
-ZAB 是 ZooKeeper Atomic Broadcast （ZooKeeper 原子广播协议）的缩写，它是特别为 ZooKeeper 设计的崩溃可恢复的原子消息广播算法。ZooKeeper 使用 Leader来接收并处理所有事务请求，并采用 ZAB 协议，将服务器数据的状态变更以事务 Proposal 的形式广播到所有的 Follower 服务器上去。这种主备模型架构保证了同一时刻集群中只有一个服务器广播服务器的状态变更，因此能够很好的保证事物的完整性和顺序性。
-Zab协议有两种模式，它们分别是恢复模式(recovery)和广播模式(broadcast)。当服务启动或者在leader崩溃后，Zab就进入了恢复模式，当leader被选举出来，且大多数follower完成了和leader的状态同步以后， 恢复模式就结束了，ZAB开始进入广播模式。
+ZAB 是 ZooKeeper Atomic Broadcast（ZooKeeper 原子广播协议）的缩写，它是特别为ZooKeeper 设计的崩溃可恢复的原子消息广播算法。ZooKeeper使用Leader来接收并处理所有事务请求，并采用ZAB协议，将服务器数据的状态变更以事务Proposal的形式广播到所有的Follower服务器上去。这种主备模型架构保证了同一时刻集群中只有一个服务器广播服务器的状态变更，因此能够很好的保证事物的完整性和顺序性。
+Zab协议有两种模式，它们分别是恢复模式(recovery)和广播模式(broadcast)。当服务启动或者leader崩溃后，Zab就进入了恢复模式，当leader被选举出来，且大多数follower完成了和leader的状态同步以后，恢复模式就结束了，ZAB开始进入广播模式。
 
 
-### 选主流程
+### ZXID
 
-当Leader崩溃或者Leader失去大多数的Follower时，Zookeeper处于恢复模式，在恢复模式下需要重新选举出一个新的Leader，让所有的 Server都恢复到一个正确的状态。Zookeeper的选举算法有两种：一种是基于basic paxos实现的，另外一种是基于fast paxos算法实现的。系统默认的选举算法为fast paxos。
+在ZAB协议的事务编号设计中，Zxid是一个64位的数字，其中低32位是一个简单的单调递增的计数器，针对客户端每一个事务请求，计数器加1；而高32位则代表Leader周期epoch的编号，每个当选产生一个新的Leader服务器，就会从这个Leader服务器上取出其本地日志中最大事务的ZXID，并从中读取epoch值，然后加1，以此作为新的epoch，并将低32位从0开始计数。
+
+epoch可以理解为当前集群所处的年代或者周期，每个leader就像皇帝，都有自己的年号，所以每次改朝换代，leader变更之后，都会在前一个年代的基础上加1。这样就算旧的leader崩溃恢复之后，也没有人听他的了，因为follower只听从当前年代的leader的命令。
+
+### 选举阶段
+
+当Leader崩溃或者Leader失去大多数的Follower时，Zookeeper进入恢复模式，在恢复模式下需要重新选举出一个新的Leader，让所有的Server都恢复到一个正确的状态。
+Zookeeper的选举算法有两种：一种是基于basic paxos实现的，另外一种是基于fast paxos算法实现的。系统默认的选举算法为fast paxos。
 
 - Basic paxos：当前Server发起选举的线程,向所有Server发起询问,选举线程收到所有回复,计算zxid最大Server,并推荐此为Leader，若此提议获得n/2+1票通过（过半同意）,此为Leader，否则重复上述流程，直到Leader选出。
 
 - Fast paxos:某Server首先向所有Server提议自己要成为Leader，当其它Server收到提议以后，解决epoch和 zxid的冲突，并接受对方的提议，然后向对方发送接受提议完成的消息，重复这个流程，最后一定能选举出Leader。(即提议方解决其他所有epoch和 zxid的冲突,即为Leader)。
 
 
-### 数据同步
+### 同步阶段
 当集群重新选举出Leader后，所有的Follower需要和Leader同步数据，确保集群数据的一致性。
 
 - 数据同步方式
@@ -226,10 +235,10 @@ Zab协议有两种模式，它们分别是恢复模式(recovery)和广播模式(
 		- 说明：leader a已经将事务truncA提交到本地事务日志中，但没有成功发起proposal协议进行投票就宕机了；然后集群中剔除原leader a重新选举出新leader b，又提交了若干新的提议proposal，然后原leader a重新服务又加入到集群中说明：此时a,b都有一些对方未提交的事务，若b是leader, a需要先回滚truncA然后增量同步新leader b上的数据。
 
 
-### 过半同意
+### 广播阶段
 
-当数据同步完成后，集群开始从恢复模式进入广播模式，开始接受客户端的事物请求。
-当只有Leader或少数机器批准执行某个任务时，则极端情况下Leader和这些少量机器挂掉，则无法保证新Leader知道之前已经批准该任务，这样就违反了数据可靠性。所以Leader在批准一个任务之前应该保证集群里大部分的机器知道这个提案，这样即使Leader挂掉，选举出来的新Leader也会从其他Follower处获取这个提案。而如果Leader要求所有Follower都同意才执行提案也不行，此时若有一个机器挂掉，Leader就无法继续工作，这样的话整个集群相当于单节点，无法保证可靠性。
+到了这个阶段，Zookeeper集群才能正式对外提供服务，并且leader开始进行消息广播。同时如果有新的节点加入，还需要对新节点进行同步。
+
 
 ![](./images/zookeeper_zab.jpg)
 
@@ -295,7 +304,7 @@ cat /proc/$PID/status|egrep '(FDSize|^Vm|^Rss|Threads|ctxt_switches)'
 	* PLUGIN.zk_proc.VoluntaryCtx
 	* PLUGIN.zk_proc.NonvoluntaryCtx
 - 报警策略：
-	* 【P2】threads大于300
+	* 【P2】threads数大于300
 
 ### JVM监控
 - 实现：
@@ -472,7 +481,7 @@ min(cpu_used/cpu_max,cons_num/cons_max,data_num/data_max,watch_num/watch_max,out
 
 ![](./images/zookeeper_util.jpg)
 
-## 日常运维
+## 日常操作
 ### 抓包分析
 
 ```
@@ -480,7 +489,6 @@ min(cpu_used/cpu_max,cons_num/cons_max,data_num/data_max,watch_num/watch_max,out
 zk-sniffer -device=eth0 -port=2181
 ```
 
-![](./images/zookeeper_sniffer.jpg)
 ![](./images/zookeeper_log.jpg)
 
 ### 分析log文件
@@ -655,7 +663,7 @@ awk '{a[$2]+=$1}END{for (i in a)print a[i],i}' path_count.txt |sort -nr -k1|head
 
 ## 一点思考
 
-Zookeeper是不是已经足够稳定了，一经部署就不再需要关注了呢？答案当然是否定的，目前我们在运维过程中还存在如下几个痛点：
+Zookeeper是不是已经足够稳定了，一经部署就不再需要关注了呢？答案当然是否定的，目前我们在运维过程中碰到如下几个问题：
 
 - Zxid频繁溢出
 - 不记录请求日志
