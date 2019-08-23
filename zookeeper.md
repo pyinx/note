@@ -61,12 +61,7 @@ Zookeeper官网地址为[http://zookeeper.apache.org/](http://zookeeper.apache.o
 
 ## Zookeeper使用场景
 
-- 名字服务
-- 配置管理
-- 集群管理
-- 集群选举
-- 分布式锁
-- 队列管理
+![](./images/zookeeper_use.png)
 
 ## Zookeeper节点状态
 
